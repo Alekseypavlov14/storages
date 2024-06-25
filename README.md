@@ -8,7 +8,7 @@ npm install @oleksii-pavlov/storages
 
 ## Usage 
 
-The package provides several classes that wrap native API to encapsulate repetitive logic like checking of existence, validations, passing key and so on. Check the list of classes: 
+The package provides several classes that wrap native API to encapsulate repetitive logic like checking for existence, validations, passing keys and so on. Check the list of classes: 
 
 ### `LocalStorage`
 ```typescript
@@ -36,7 +36,7 @@ TokenSessionStorage.setValue('token')
 TokenSessionStorage.getValue() // 'token'
 ```
 
-### Cache
+### `Cache`
 ```typescript
 interface Response {
   data: any[]
