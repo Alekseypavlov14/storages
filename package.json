@@ -1,0 +1,23 @@
+{
+  "name": "@oleksii-pavlov/storages",
+  "version": "1.0.0",
+  "description": "List of utils that help to use local storage, session storage and allows to use cache",
+  "main": "./build/index.js",
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "build": "tsc"
+  },
+  "keywords": [
+    "storages",
+    "local storage",
+    "session storage",
+    "cache",
+    "utils"
+  ],
+  "author": "Oleksii Pavlov <aleshapavlov9@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.12.13",
+    "typescript": "^5.4.5"
+  }
+}
