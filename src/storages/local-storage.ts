@@ -20,4 +20,10 @@ export class LocalStorage<Value> {
     const stringifiedItem = JSON.stringify(value)
     localStorage.setItem(this.key, stringifiedItem)
   }
+
+  removeValue(): Value | null {
+    const savedValue = this.getValue()
+    localStorage.removeItem(this.key)
+    return savedValue
+  }
 }

@@ -20,4 +20,10 @@ export class SessionStorage<Value> {
     const stringifiedItem = JSON.stringify(value)
     sessionStorage.setItem(this.key, stringifiedItem)
   }
+
+  removeValue(): Value | null {
+    const savedValue = this.getValue()
+    sessionStorage.removeItem(this.key)
+    return savedValue
+  }
 }
