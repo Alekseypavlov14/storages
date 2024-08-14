@@ -15,7 +15,7 @@ export class CollectionCache<Value, Selection> {
     try {
       const parsedValue = this.getCachedCollection()
 
-      const validCollectionElements = parsedValue.filter(this.isCollectionElementValid)
+      const validCollectionElements = parsedValue.filter((value) => this.isCollectionElementValid(value))
 
       return validCollectionElements.map(collectionElement => collectionElement.value)
     } catch(e) {
@@ -40,9 +40,14 @@ export class CollectionCache<Value, Selection> {
   addValue(value: Value): void {
     try {
       const parsedValue = this.getCachedCollection()
-      const newElement = this.prepareCachedValue(value)
 
-      const updatedValue = parsedValue.concat([newElement])
+      const filteredValue = parsedValue.filter(cache => {
+        return this.config.selector(cache.value) !== this.config.selector(value)
+      })
+
+      const newElement = this.prepareCachedValue(value)
+      const updatedValue = filteredValue.concat([newElement])
+
       this.setCachedCollection(updatedValue)
     } catch(e) {}
   }
