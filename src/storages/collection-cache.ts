@@ -34,7 +34,10 @@ export class CollectionCache<Value, Selection> {
 
   getValueById(id: Selection): Value | null {
     const collection = this.getValue()
+
     const foundElement = collection.find(element => this.config.selector(element) === id) ?? null
+    if (foundElement === null) this.removeValueById(id)
+
     return foundElement
   }
   addValue(value: Value): void {
