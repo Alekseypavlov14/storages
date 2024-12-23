@@ -1,6 +1,7 @@
 import { CachedValue } from '../types/cached-value'
+import { Storage } from '../types/storage'
 
-export class Cache<Value> {
+export class Cache<Value> implements Storage<Value> {
   constructor(
     readonly key: string,
     private readonly timeout: number,

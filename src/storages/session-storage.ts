@@ -1,4 +1,6 @@
-export class SessionStorage<Value> {
+import { Storage } from '../types/storage'
+
+export class SessionStorage<Value> implements Storage<Value> {
   constructor(
     private readonly key: string,
     private readonly defaultValue: Value | null = null

@@ -1,4 +1,5 @@
 import { CachedValue } from '../types/cached-value'
+import { Storage } from '../types/storage'
 
 export interface CollectionCacheConfig<Value, Selection> {
   readonly key: string
@@ -6,7 +7,7 @@ export interface CollectionCacheConfig<Value, Selection> {
   readonly selector: (value: Value) => Selection
 }
 
-export class CollectionCache<Value, Selection> {
+export class CollectionCache<Value, Selection> implements Storage<Value[]> {
   private readonly defaultValue: Value[] = []
 
   constructor(private readonly config: CollectionCacheConfig<Value, Selection>) {}

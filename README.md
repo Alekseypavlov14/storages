@@ -6,6 +6,13 @@
 npm install @oleksii-pavlov/storages
 ```
 
+## Utilities
+
+- LocalStorage
+- SessionStorage
+- Cache
+- CollectionCache
+
 ## Usage 
 
 The package provides several classes that wrap native APIs to encapsulate repetitive logic like checking for existence, validations, passing keys, and so on. Here’s the list of available classes:

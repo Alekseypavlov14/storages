@@ -1,4 +1,6 @@
-export class LocalStorage<Value> {
+import { Storage } from '../types/storage'
+
+export class LocalStorage<Value> implements Storage<Value> {
   constructor(
     private readonly key: string,
     private readonly defaultValue: Value | null = null
