@@ -6,170 +6,176 @@
 npm install @oleksii-pavlov/storages
 ```
 
-## Utilities
+## Classes
 
-- LocalStorage
-- SessionStorage
-- Cache
-- CollectionCache
+### `LocalStorage<Value>`
 
-## Usage 
+Manages values in `localStorage`.
 
-The package provides several classes that wrap native APIs to encapsulate repetitive logic like checking for existence, validations, passing keys, and so on. Here’s the list of available classes:
+- **Constructor**:
+  - `(key: string, defaultValue: Value | null = null)`
+- **Methods**:
+  - `getValue(): Value | null`
+  - `setValue(value: Value): void`
+  - `removeValue(): Value | null`
 
-### `LocalStorage`
+### `SessionStorage<Value>`
+
+Manages values in `sessionStorage`.
+
+- **Constructor**:
+  - `(key: string, defaultValue: Value | null = null)`
+- **Methods**:
+  - `getValue(): Value | null`
+  - `setValue(value: Value): void`
+  - `removeValue(): Value | null`
+
+### `CacheStorage<Value>`
+
+Implements a caching mechanism with timeout support.
+
+- **Constructor**:
+  - `(storage: Storage<CachedValue<Value>>, timeout: number)`
+- **Properties**:
+  - `readonly defaultValue: Value | null`
+- **Methods**:
+  - `getValue(): Value | null`
+  - `setValue(value: Value): void`
+  - `removeValue(): Value | null`
+
+### `CollectionStorage<Value>`
+
+Manages collections of values and allows retrieving or removing them by a selector.
+
+- **Constructor**:
+  - `(storage: Storage<Value[]>)`
+- **Methods**:
+  - `getValueBySelector(selector: Selector<Value>): Value | null`
+  - `setValue(value: Value): void`
+  - `removeValueBySelector(selector: Selector<Value>): void`
+  - `removeAllValues(): void`
+
+### `HashMapStorage<Value>`
+
+Manages a dictionary-like structure of values.
+
+- **Constructor**:
+  - `(storage: Storage<HashMap<Value>>)`
+- **Methods**:
+  - `getValueByKey(key: HashMapKey): Value | null`
+  - `setValueByKey(key: HashMapKey, value: Value): void`
+  - `removeValueByKey(key: HashMapKey): void`
+  - `removeAllValues(): void`
+
+## Interfaces and Types
+
+### `Storage<T>`
+
+Defines a general interface for storage classes.
+
+- **Properties**:
+  - `readonly defaultValue: T | null`: The default value returned when no value exists in storage.
+- **Methods**:
+  - `getValue(): T | null`: Retrieves the value from storage.
+  - `setValue(value: T): void`: Saves a value to storage.
+  - `removeValue(): T | null`: Removes the value from storage and returns it.
+
+### `CachedValue<T>`
+
+Represents a cached value with metadata.
+
+- **Properties**:
+  - `value: T`: The cached value.
+  - `saveMoment: number`: The timestamp when the value was cached.
+
+### `Selector<Value>`
+
+Defines a function type used to select specific values from collections.
+
+- **Signature**: `(value: Value, index: number, array: Value[]) => boolean`
+
+### `HashMap<T>`
+
+Represents a dictionary-like structure where keys are strings or numbers.
+
+- **Extends**: `Record<HashMapKey, T>`
+
+### `HashMapKey`
+
+Defines valid keys for a `HashMap`.
+
+- **Type**: `string | number`
+
+## Example Usages
+
+### LocalStorage Example
 
 ```typescript
-interface NoteEntity {
-  message: string
-}
+const localStorageManager = new LocalStorage<number>('exampleKey', 42)
 
-const defaultNote: NoteEntity = {
-  message: 'Default'
-}
+localStorageManager.setValue(100)
+console.log(localStorageManager.getValue()) // 100
 
-const NotesLocalStorage = new LocalStorage<NoteEntity>('notes', defaultNote)
-
-NotesLocalStorage.getValue() // { message: 'Default' }
-NotesLocalStorage.setValue({ message: 'Hello' })
-NotesLocalStorage.getValue() // { message: 'Hello' }
+localStorageManager.removeValue()
 ```
 
-### `SessionStorage`
+### CacheStorage Example
 
 ```typescript
-const TokenSessionStorage = new SessionStorage<string>('token')
+const localStorageForCache = new LocalStorage<CachedValue<string>>('cacheKey')
+const cache = new CacheStorage(localStorageForCache, 60000) // 1-minute timeout
 
-TokenSessionStorage.getValue() // null 
-TokenSessionStorage.setValue('token')
-TokenSessionStorage.getValue() // 'token'
+cache.setValue('cachedValue')
+console.log(cache.getValue())
 ```
 
-### `Cache`
+### CollectionStorage Example
 
 ```typescript
-interface Response {
-  data: any[]
-}
-
-const APIResponseCache = new Cache<Response>('response', 5000)
-
-APIResponseCache.getValue() // null
-
-APIResponseCache.setValue({ data: [] })
-APIResponseCache.getValue() // { data: [] }
-
-setTimeout(() => {
-  APIResponseCache.getValue() // null
-}, 10000)
-```
-
-### `CollectionCache`
-
-The `CollectionCache` class allows for caching collections of items where each element is cached individually with expiration time and selection logic.
-
-```typescript
-interface User {
-  id: string
+interface Product {
+  id: number
   name: string
+  category: string
+  price: number
 }
 
-const UserCache = new CollectionCache<User, string>({
-  key: 'users',
-  timeout: 60_000, // 1 minute
-  selector: (user: User) => user.id
-})
+const productStorage = new LocalStorage<Product[]>('products', [])
+const productCache = new CollectionStorage(productStorage)
 
-// Add a user
-UserCache.addValue({ id: '1', name: 'Alice' })
+// Add new products
+productCache.setValue({ id: 1, name: 'Laptop', category: 'Electronics', price: 1500 })
+productCache.setValue({ id: 2, name: 'Chair', category: 'Furniture', price: 100 })
+productCache.setValue({ id: 3, name: 'Headphones', category: 'Electronics', price: 200 })
 
-// Get all users
-const users = UserCache.getValue() // [{ id: '1', name: 'Alice' }]
+// Get a product by selector
+const laptop = productCache.getValueBySelector(product => product.name === 'Laptop')
+console.log(laptop) // { id: 1, name: 'Laptop', category: 'Electronics', price: 1500 }
 
-// Get a user by ID
-const user = UserCache.getValueById('1') // { id: '1', name: 'Alice' }
+// Remove a product by selector
+productCache.removeValueBySelector(product => product.id === 2)
 
-// Remove a user by ID
-UserCache.removeValueById('1')
+// Get all remaining products
+const allProducts = productStorage.getValue()
+console.log(allProducts)
+// [
+//   { id: 1, name: 'Laptop', category: 'Electronics', price: 1500 },
+//   { id: 3, name: 'Headphones', category: 'Electronics', price: 200 }
+// ]
+
+// Remove all products
+productCache.removeAllValues()
+console.log(productStorage.getValue()) // []
 ```
 
-## API
+### HashMapStorage Example
 
-### LocalStorage
+```typescript
+const hashMapStorage = new LocalStorage<HashMap<string>>('hashMapKey', {})
+const hashMap = new HashMapStorage(hashMapStorage)
 
-#### `constructor(key: string, defaultValue: Value | null = null)`
+hashMap.setValueByKey('key1', 'value1')
+console.log(hashMap.getValueByKey('key1')) // 'value1'
 
-- `key`: The key to store the value under in `localStorage`.
-- `defaultValue`: The default value to return if the key does not exist.
+hashMap.removeValueByKey('key1')
+```
 
-#### `getValue(): Value | null`
-
-Returns the stored value or the default value if the key does not exist or an error occurs.
-
-#### `setValue(value: Value): void`
-
-Stores the given value under the specified key in `localStorage`.
-
-### SessionStorage
-
-#### `constructor(key: string, defaultValue: Value | null = null)`
-
-- `key`: The key to store the value under in `sessionStorage`.
-- `defaultValue`: The default value to return if the key does not exist.
-
-#### `getValue(): Value | null`
-
-Returns the stored value or the default value if the key does not exist or an error occurs.
-
-#### `setValue(value: Value): void`
-
-Stores the given value under the specified key in `sessionStorage`.
-
-### Cache
-
-#### `constructor(key: string, timeout: number, defaultValue: Value | null = null)`
-
-- `key`: The key to store the value under in `localStorage`.
-- `timeout`: The time in milliseconds after which the cached value expires.
-- `defaultValue`: The default value to return if the key does not exist or the cached value has expired.
-
-#### `getValue(): Value | null`
-
-Returns the stored value if it has not expired, otherwise returns the default value.
-
-#### `setValue(value: Value): void`
-
-Stores the given value along with the current timestamp under the specified key in `localStorage`.
-
-### CollectionCache
-
-#### `constructor(config: CollectionCacheConfig<Value, Selection>)`
-
-- `config`: An object containing configuration options for the `CollectionCache`:
-  - `key`: The key to store the collection under in `localStorage`.
-  - `timeout`: The time in milliseconds after which each cached item in the collection expires.
-  - `selector`: A function that takes an item from the collection and returns a unique identifier (of type `Selection`) for that item.
-
-#### `getValue(): Value[]`
-
-Returns an array of stored values that have not expired. If no valid items are found, returns an empty array.
-
-#### `setValue(collection: Value[]): void`
-
-Stores an array of values, caching each item individually under the specified key.
-
-#### `removeValue(): Value[]`
-
-Removes the entire collection from the cache and returns the last valid collection of values before removal.
-
-#### `getValueById(id: Selection): Value | null`
-
-Returns a single item from the collection that matches the provided identifier (`id`) using the `selector` function. Returns `null` if the item is not found.
-
-#### `addValue(value: Value): void`
-
-Adds a single item to the cached collection, caching it individually with its own expiration time.
-
-#### `removeValueById(id: Selection): Value | null`
-
-Removes a single item from the cached collection based on its identifier (`id`) and returns the removed value. Returns `null` if the item is not found.
