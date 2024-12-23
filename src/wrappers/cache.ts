@@ -6,9 +6,10 @@ export class CacheStorage<Value> {
 
   constructor (
     readonly storage: Storage<CachedValue<Value>>,
-    readonly timeout: number
+    readonly timeout: number,
+    defaultValue?: Value | null
   ) {
-    this.defaultValue = storage.defaultValue?.value ?? null
+    this.defaultValue = defaultValue ?? storage.defaultValue?.value ?? null
   }
 
   getValue(): Value | null {

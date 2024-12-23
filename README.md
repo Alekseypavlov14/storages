@@ -35,7 +35,7 @@ Manages values in `sessionStorage`.
 Implements a caching mechanism with timeout support.
 
 - **Constructor**:
-  - `(storage: Storage<CachedValue<Value>>, timeout: number)`
+  - `(storage: Storage<CachedValue<Value>>, timeout: number, defaultValue?: Value | null)`
 - **Properties**:
   - `readonly defaultValue: Value | null`
 - **Methods**:
@@ -48,7 +48,7 @@ Implements a caching mechanism with timeout support.
 Manages collections of values and allows retrieving or removing them by a selector.
 
 - **Constructor**:
-  - `(storage: Storage<Value[]>)`
+  - `(storage: Storage<Value[]>, defaultValue?: Value | null)`
 - **Methods**:
   - `getValueBySelector(selector: Selector<Value>): Value | null`
   - `setValue(value: Value): void`
@@ -60,7 +60,7 @@ Manages collections of values and allows retrieving or removing them by a select
 Manages a dictionary-like structure of values.
 
 - **Constructor**:
-  - `(storage: Storage<HashMap<Value>>)`
+  - `(storage: Storage<HashMap<Value>>, defaultValue?: Value | null)`
 - **Methods**:
   - `getValueByKey(key: HashMapKey): Value | null`
   - `setValueByKey(key: HashMapKey, value: Value): void`
@@ -108,6 +108,34 @@ Defines valid keys for a `HashMap`.
 
 ## Example Usages
 
+### Setups Overview
+
+The concept of setups provides predefined configurations and wrappers for specific storage use cases, such as managing collections, hash maps, or cached data. These setups streamline implementation by encapsulating the `Storage` logic with a higher-level API, allowing for easy instantiation and reuse across local and session storages. Below, examples showcase how setups simplify the usage of storage classes. **The main purpose of setups is to reduce boilerplate code amount leaving only straightforward parts**. Setups are defined for all wrappers for both local and session storage. They are named as `<Wrapper><Local/Session>Storage`. For example, `CacheLocalStorage` is a cache storage with local storage approach.
+
+### LocalStorage with Setup Example
+
+```typescript
+import { CollectionLocalStorage } from '@oleksii-pavlov/storages'
+
+const productStorage = new CollectionLocalStorage<Product>('products', null)
+
+productStorage.setValue({ id: 1, name: 'Laptop', category: 'Electronics', price: 1500 })
+productStorage.setValue({ id: 2, name: 'Chair', category: 'Furniture', price: 100 })
+
+const laptop = productStorage.getValueBySelector(product => product.name === 'Laptop')
+console.log(laptop) // { id: 1, name: 'Laptop', category: 'Electronics', price: 1500 }
+```
+
+### CacheStorage with Setup Example
+
+```typescript
+import { CacheLocalStorage } from '@oleksii-pavlov/storages'
+
+const userCache = new CacheLocalStorage<string>('userCache', 60000, 'defaultUser')
+userCache.setValue('cachedUser')
+console.log(userCache.getValue())
+```
+
 ### LocalStorage Example
 
 ```typescript
@@ -123,7 +151,7 @@ localStorageManager.removeValue()
 
 ```typescript
 const localStorageForCache = new LocalStorage<CachedValue<string>>('cacheKey')
-const cache = new CacheStorage(localStorageForCache, 60000) // 1-minute timeout
+const cache = new CacheStorage(localStorageForCache, 60000, 'defaultCacheValue') // 1-minute timeout
 
 cache.setValue('cachedValue')
 console.log(cache.getValue())
@@ -140,7 +168,7 @@ interface Product {
 }
 
 const productStorage = new LocalStorage<Product[]>('products', [])
-const productCache = new CollectionStorage(productStorage)
+const productCache = new CollectionStorage(productStorage, null)
 
 // Add new products
 productCache.setValue({ id: 1, name: 'Laptop', category: 'Electronics', price: 1500 })
@@ -171,7 +199,7 @@ console.log(productStorage.getValue()) // []
 
 ```typescript
 const hashMapStorage = new LocalStorage<HashMap<string>>('hashMapKey', {})
-const hashMap = new HashMapStorage(hashMapStorage)
+const hashMap = new HashMapStorage(hashMapStorage, 'defaultHashValue')
 
 hashMap.setValueByKey('key1', 'value1')
 console.log(hashMap.getValueByKey('key1')) // 'value1'

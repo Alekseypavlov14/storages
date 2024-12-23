@@ -2,11 +2,14 @@ import { Selector } from '../types/selector'
 import { Storage } from '../types/storage'
 
 export class CollectionStorage<Value> {
-  constructor (readonly storage: Storage<Value[]>) {}
+  constructor (
+    readonly storage: Storage<Value[]>,
+    readonly defaultValue?: Value | null
+  ) {}
   
   getValueBySelector(selector: Selector<Value>) {
     const savedValues: Value[] = this.storage.getValue() || []
-    const searchedValue = savedValues.find(selector) ?? this.storage.defaultValue
+    const searchedValue = savedValues.find(selector) ?? this.defaultValue ?? null
     return searchedValue
   }
 

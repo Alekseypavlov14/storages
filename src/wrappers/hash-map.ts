@@ -2,11 +2,14 @@ import { HashMap, HashMapKey } from '../types/hash-map'
 import { Storage } from '../types/storage'
 
 export class HashMapStorage<Value> {
-  constructor (readonly storage: Storage<HashMap<Value>>) {}
+  constructor (
+    readonly storage: Storage<HashMap<Value>>,
+    readonly defaultValue?: Value | null
+  ) {}
 
   getValueByKey(key: HashMapKey) {
     const savedValues: HashMap<Value> = this.storage.getValue() || {}
-    const searchedValue = savedValues[key] ?? this.storage.defaultValue?.[key] ?? null
+    const searchedValue = savedValues[key] ?? this.defaultValue ?? this.storage.defaultValue?.[key] ?? null
     return searchedValue
   }
 
