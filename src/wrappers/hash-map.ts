@@ -6,7 +6,7 @@ export class HashMapStorage<Value> {
 
   getValueByKey(key: HashMapKey) {
     const savedValues: HashMap<Value> = this.storage.getValue() || {}
-    const searchedValue = savedValues[key] ?? this.storage.defaultValue
+    const searchedValue = savedValues[key] ?? this.storage.defaultValue?.[key] ?? null
     return searchedValue
   }
 
